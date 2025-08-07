@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from models.schemas import QueryRequest, QueryResponse, DetailedAnswer
 from services.document_loader import load_document
 from services.llm_extractor import extract_structured_data
 from services.embedding_search import search_embeddings
 from services.clause_matcher import match_clauses
 from services.logic_evaluator import evaluate_logic
+from utils.auth import verify_token
 import asyncio
 import logging
 
 router = APIRouter()
 
 @router.post("/hackrx/run", response_model=QueryResponse)
-async def run_query(request: QueryRequest):
+async def run_query(request: QueryRequest, auth=Depends(verify_token)):
     try:
         # Step 1: Load and process document
         doc_text = await load_document(request.documents)
@@ -28,7 +29,7 @@ async def run_query(request: QueryRequest):
                 sentences = doc_text.split('.')
                 clauses = [s.strip() for s in sentences if len(s.strip()) > 20][:10]
                 structured_data = {"clauses": clauses, "entities": [], "sections": []}
-                
+
         except Exception as e:
             print(f"LLM extraction failed: {e}, using simple fallback")
             #emergency fallback
