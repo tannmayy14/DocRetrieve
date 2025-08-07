@@ -1,4 +1,6 @@
-from sentence_transformers import util
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 def match_clauses(clauses_list, questions):
     """
@@ -8,18 +10,18 @@ def match_clauses(clauses_list, questions):
     """
     results = []
     for q, clauses in zip(questions, clauses_list):
-        q_emb = util.cos_sim  # For clarity
-        # Get embedding for question
-        from services.embedding_search import embedder
-        q_vec = embedder.encode([q], convert_to_tensor=True)
-        clause_vecs = embedder.encode(clauses, convert_to_tensor=True)
-        # Compute similarity
-        sims = util.cos_sim(q_vec, clause_vecs)[0]
+        if not clauses:
+            results.append([])
+            continue
+        # Fit TF-IDF on clauses
+        vectorizer = TfidfVectorizer().fit(clauses + [q])
+        clause_vecs = vectorizer.transform(clauses)
+        q_vec = vectorizer.transform([q])
+        sims = cosine_similarity(q_vec, clause_vecs)[0]
         matched = [
             {"clause": clause, "similarity": float(sim)}
             for clause, sim in zip(clauses, sims)
         ]
-        # Sort by similarity descending
         matched.sort(key=lambda x: x["similarity"], reverse=True)
         results.append(matched)
     return results
