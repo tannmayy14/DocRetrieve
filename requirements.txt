@@ -1,0 +1,13 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+pdfplumber==3.9.0
+python-docx==0.8.11
+requests==2.31.0
+sentence-transformers==2.2.2
+faiss-cpu==1.7.4
+groq==0.4.1
+dotenv==1.0.0
+pydantic==2.5.0
+python-multipart==0.0.6
+aiohttp==3.8.6
+python-magic-bin==0.4.14
